@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Skinny Slider</title>
+
+	<style type="text/css">
+
+		#slider {
+			background-color: #08f;
+			width: 200px;
+			height: 10px;
+		}
+
+		#slider .handle {
+			background-color: #fff;
+			border-radius: 5px;
+			width: 10px;
+			height: 10px;
+		}
+
+	</style>
+
+	<script src="skinny-slider.min.js"></script>
+</head>
+<body>
+
+	<div id="slider"></div>
+	<script>
+		new SkinnySlider('slider', {
+			range: [0, 100],
+			start: 10,
+			step: 1,
+			slide: function(val) {
+				console.log(val);
+			}
+		});
+	</script>
+
+</body>
+</html>

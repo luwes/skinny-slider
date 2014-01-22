@@ -1,0 +1,36 @@
+/*global module:false*/
+module.exports = function(grunt) {
+	// Project configuration.
+	grunt.initConfig({
+		// Metadata.
+		pkg: grunt.file.readJSON('package.json'),
+		// Task configuration.
+		uglify: {
+			all: {
+				options: {
+					enclose: {
+						'window,document': 'window,document'
+					}
+				},
+				files: {
+					'skinny-slider.min.js': [
+						'src/*.js',
+					]
+				}
+			}
+		},
+		watch: {
+			js: {
+				files: 'src/*.js',
+				tasks: ['uglify']
+			}
+		}
+	});
+
+	// These plugins provide necessary tasks.
+	grunt.loadNpmTasks('grunt-contrib-uglify');
+	grunt.loadNpmTasks('grunt-contrib-watch');
+
+	// Default task.
+	grunt.registerTask('default', ['uglify']);
+};
