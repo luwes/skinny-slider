@@ -37,6 +37,8 @@ var C = window.SkinnySlider = function(id, options) {
 	if (this.config.slide) {
 		this.events.slide.on(this.config.slide);
 	}
+
+	this.set(this.config.start);
 };
 
 C.prototype.lockOnMouse = function(e) {
