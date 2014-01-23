@@ -29,12 +29,12 @@
 
 	<div id="slider"></div>
 	<script>
-		new SkinnySlider('slider', {
-			range: [10, 100],
+		var slider = new SkinnySlider('slider', {
+			range: [10, 80],
 			start: 10,
-			step: 2,
+			step: 10,
 			slide: function(val) {
-				console.log(val);
+				//console.log(val);
 			}
 		});
 	</script>

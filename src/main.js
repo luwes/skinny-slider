@@ -1,5 +1,5 @@
 
-window.SkinnySlider = function(id, options) {
+var C = window.SkinnySlider = function(id, options) {
 
 	var defaults = {
 		range: [0, 100],
@@ -15,7 +15,10 @@ window.SkinnySlider = function(id, options) {
 	};
 
 	this.lock = false;
-	this.oldValue = null;
+	this.value = null;
+
+	this.min = this.config.range[0];
+	this.max = this.config.range[1];
 
 	this.el = document.getElementById(id);
 	_.css(this.el, { position: 'relative' });
@@ -25,10 +28,10 @@ window.SkinnySlider = function(id, options) {
 	_.css(this.handle, { position: 'absolute' });
 
 	var lock = _.bind(this.lockOnMouse, this);
-	_.on(this.el, 'mousedown', lock);
-	_.on(this.handle, 'mousedown', lock);
-	_.on(document, 'mouseup', lock);
-	_.on(document, 'mousemove', _.bind(this.changeOnMove, this));
+	_.on(this.el, 'mousedown touchstart', lock);
+	_.on(this.handle, 'mousedown touchstart', lock);
+	_.on(document, 'mouseup touchend', lock);
+	_.on(document, 'mousemove touchmove', _.bind(this.changeOnMove, this));
 
 	this.events.slide.on(_.bind(this.render, this));
 	if (this.config.slide) {
@@ -36,31 +39,43 @@ window.SkinnySlider = function(id, options) {
 	}
 };
 
-SkinnySlider.prototype.lockOnMouse = function(e) {
-	this.lock = e.type === 'mousedown';
+C.prototype.lockOnMouse = function(e) {
+	if (e.stopPropagation) e.stopPropagation();
+	if (e.preventDefault) e.preventDefault();
+
+	this.lock = /mousedown|touchstart/.test(e.type);
 	this.changeOnMove(e);
 };
 
-SkinnySlider.prototype.changeOnMove = function(e) {
+C.prototype.changeOnMove = function(e) {
 	if (this.lock) {
+		if (e.stopPropagation) e.stopPropagation();
 		if (e.preventDefault) e.preventDefault();
 
 		var x = e.pageX - _.getOffset(this.el).left;
-		var ratio = x / this.el.clientWidth;
-		var clamp = Math.max(0, Math.min(ratio, 1));
-
-		var div = (this.config.range[1] - this.config.range[0]) / this.config.step;
+		var mapped = _.map(x, 0, this.el.clientWidth, this.min, this.max);
 		
-		var value = Math.round(clamp * div) * this.config.step + this.config.range[0];
-		var percent = Math.round(clamp * div) * 100 / div;
-
-		if (value != this.oldValue) {
-			this.events.slide.trigger(value, percent);
-			this.oldValue = value;
-		}
+		this.set(mapped);
 	}
 };
 
-SkinnySlider.prototype.render = function(val, per) {
+C.prototype.render = function(val) {
+	var per = _.map(val, this.min, this.max, 0, 100);
 	_.css(this.handle, { left: per + '%' });
+};
+
+C.prototype.val = function(val) {
+	if (val === undefined) return this.value;
+	this.set(val);
+};
+
+C.prototype.set = function(mapped) {
+
+	var clamped = _.clamp(mapped, this.min, this.max);
+	var rounded = _.round(clamped, this.config.step);
+
+	if (rounded != this.value) {
+		this.events.slide.trigger(rounded);
+		this.value = rounded;
+	}
 };
