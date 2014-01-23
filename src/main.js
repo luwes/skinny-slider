@@ -40,6 +40,7 @@ var C = window.SkinnySlider = function(id, options) {
 };
 
 C.prototype.lockOnMouse = function(e) {
+	e = e || window.event;
 	if (e.stopPropagation) e.stopPropagation();
 	if (e.preventDefault) e.preventDefault();
 
@@ -48,11 +49,12 @@ C.prototype.lockOnMouse = function(e) {
 };
 
 C.prototype.changeOnMove = function(e) {
+	e = e || window.event;
 	if (this.lock) {
 		if (e.stopPropagation) e.stopPropagation();
 		if (e.preventDefault) e.preventDefault();
 
-		var x = e.pageX - _.getOffset(this.el).left;
+		var x = _.getPointer(e).x - _.getOffset(this.el).left;
 		var mapped = _.map(x, 0, this.el.clientWidth, this.min, this.max);
 		
 		this.set(mapped);

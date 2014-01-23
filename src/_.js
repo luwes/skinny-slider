@@ -53,6 +53,22 @@ var _ = {
 		}
 	},
 
+	getPointer: function(e) {
+		var x = e.pageX,
+			y = e.pageY;
+		if (e.touches) {
+			x = e.touches[0].pageX;
+			y = e.touches[0].pageY;
+		}
+		if (x == null) {
+			var doc = document.documentElement;
+			var body = document.body;
+			x = e.clientX + (doc.scrollLeft || body.scrollLeft || 0) - (doc.clientLeft || body.clientLeft || 0);
+			y = e.clientY + (doc.scrollTop || body.scrollTop  || 0) - (doc.clientTop  || body.clientTop  || 0);
+		}
+		return { x: x, y: y };
+	},
+
 	getOffset: function(el) {
 		var docElem = document.documentElement;
 		var box = el.getBoundingClientRect(el);
