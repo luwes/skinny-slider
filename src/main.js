@@ -20,7 +20,7 @@ var C = window.SkinnySlider = function(id, options) {
 	this.min = this.config.range[0];
 	this.max = this.config.range[1];
 
-	this.el = document.getElementById(id);
+	this.el = document.getElementById(id) || id;
 	_.css(this.el, { position: 'relative' });
 
 	this.handle = _.append(this.el);

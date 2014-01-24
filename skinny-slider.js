@@ -74,7 +74,7 @@
         this.config = c.extend(f, d), this.events = {
             slide: new e()
         }, this.lock = !1, this.value = null, this.min = this.config.range[0], this.max = this.config.range[1], 
-        this.el = b.getElementById(a), c.css(this.el, {
+        this.el = b.getElementById(a) || a, c.css(this.el, {
             position: "relative"
         }), this.handle = c.append(this.el), c.addClass(this.handle, "handle"), c.css(this.handle, {
             position: "absolute"
