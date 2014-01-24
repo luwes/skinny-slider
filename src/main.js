@@ -80,6 +80,9 @@ C.prototype.val = function(val) {
 
 C.prototype.set = function(mapped) {
 	var clamped = _.clamp(mapped, this.min, this.max);
-	this.value = _.round(clamped, this.config.step);
-	this.events.set.trigger(this.value);
+	var rounded = _.round(clamped, this.config.step);
+	if (rounded != this.value) {
+		this.value = rounded;
+		this.events.set.trigger(this.value);
+	}
 };

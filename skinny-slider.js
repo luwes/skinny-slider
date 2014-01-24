@@ -102,8 +102,8 @@
     }, d.prototype.val = function(a) {
         return void 0 === a ? this.value : void this.set(a);
     }, d.prototype.set = function(a) {
-        var b = c.clamp(a, this.min, this.max);
-        this.value = c.round(b, this.config.step), this.events.set.trigger(this.value);
+        var b = c.clamp(a, this.min, this.max), d = c.round(b, this.config.step);
+        d != this.value && (this.value = d, this.events.set.trigger(this.value));
     };
     var e = function() {
         var a = [];
