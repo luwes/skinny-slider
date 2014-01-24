@@ -1,127 +1,128 @@
-!function(a, b) {
-    var c = {
-        append: function(a, c) {
-            var d = b.createElement(c || "div");
-            return a.appendChild(d);
+!function(window, document) {
+    var _ = {
+        append: function(parent, type) {
+            var el = document.createElement(type || "div");
+            return parent.appendChild(el);
         },
-        addClass: function(a, b) {
-            -1 === a.className.indexOf(b) && (a.className += " " + b);
+        addClass: function(el, classname) {
+            -1 === el.className.indexOf(classname) && (el.className += " " + classname);
         },
-        bind: function(a, b) {
+        bind: function(fn, context) {
             return function() {
-                a.apply(b, [].slice.call(arguments));
+                fn.apply(context, [].slice.call(arguments));
             };
         },
-        on: function(a, b, c) {
-            if (a) for (var d = b.split(" "), e = 0; e < d.length; e++) a.attachEvent ? a.attachEvent("on" + d[e], c) : a.addEventListener(d[e], c, !1);
+        on: function(el, type, fn) {
+            if (el) for (var arr = type.split(" "), i = 0; i < arr.length; i++) el.attachEvent ? el.attachEvent("on" + arr[i], fn) : el.addEventListener(arr[i], fn, !1);
         },
-        off: function(a, b, c) {
-            if (a) for (var d = b.split(" "), e = 0; e < d.length; e++) a.detachEvent ? a.detachEvent("on" + d[e], c) : a.removeEventListener(d[e], c, !1);
+        off: function(el, type, fn) {
+            if (el) for (var arr = type.split(" "), i = 0; i < arr.length; i++) el.detachEvent ? el.detachEvent("on" + arr[i], fn) : el.removeEventListener(arr[i], fn, !1);
         },
-        extend: function(a, b) {
-            for (var c in b) a[c] = b[c];
-            return a;
+        extend: function(src, dest) {
+            for (var key in dest) src[key] = dest[key];
+            return src;
         },
-        css: function(a, b) {
-            if (a) for (var c in b) if ("undefined" != typeof b[c]) {
-                if ("number" == typeof b[c] && "zIndex" != c && "opacity" != c) {
-                    if (isNaN(b[c])) continue;
-                    b[c] = Math.ceil(b[c]) + "px";
+        css: function(el, props) {
+            if (el) for (var key in props) if ("undefined" != typeof props[key]) {
+                if ("number" == typeof props[key] && "zIndex" != key && "opacity" != key) {
+                    if (isNaN(props[key])) continue;
+                    props[key] = Math.ceil(props[key]) + "px";
                 }
                 try {
-                    a.style[c] = b[c];
-                } catch (d) {}
+                    el.style[key] = props[key];
+                } catch (e) {}
             }
         },
-        getPointer: function(a) {
-            var c = a.pageX, d = a.pageY;
-            if (a.touches && (c = a.touches[0].pageX, d = a.touches[0].pageY), null == c) {
-                var e = b.documentElement, f = b.body;
-                c = a.clientX + (e.scrollLeft || f.scrollLeft || 0) - (e.clientLeft || f.clientLeft || 0), 
-                d = a.clientY + (e.scrollTop || f.scrollTop || 0) - (e.clientTop || f.clientTop || 0);
+        getPointer: function(e) {
+            var x = e.pageX, y = e.pageY;
+            if (e.touches && (x = e.touches[0].pageX, y = e.touches[0].pageY), null == x) {
+                var doc = document.documentElement, body = document.body;
+                x = e.clientX + (doc.scrollLeft || body.scrollLeft || 0) - (doc.clientLeft || body.clientLeft || 0), 
+                y = e.clientY + (doc.scrollTop || body.scrollTop || 0) - (doc.clientTop || body.clientTop || 0);
             }
             return {
-                x: c,
-                y: d
+                x: x,
+                y: y
             };
         },
-        getOffset: function(c) {
-            var d = b.documentElement, e = c.getBoundingClientRect(c);
+        getOffset: function(el) {
+            var docElem = document.documentElement, box = el.getBoundingClientRect(el);
             return {
-                top: e.top + (a.pageYOffset || d.scrollTop) - (d.clientTop || 0),
-                left: e.left + (a.pageXOffset || d.scrollLeft) - (d.clientLeft || 0)
+                top: box.top + (window.pageYOffset || docElem.scrollTop) - (docElem.clientTop || 0),
+                left: box.left + (window.pageXOffset || docElem.scrollLeft) - (docElem.clientLeft || 0)
             };
         },
-        round: function(a, b) {
-            return b = b || 1, Math.round(a / b) * b;
+        round: function(value, radix) {
+            return radix = radix || 1, Math.round(value / radix) * radix;
         },
-        clamp: function(a, b, c) {
-            return b > a ? b : a > c ? c : a;
+        clamp: function(val, min, max) {
+            return min > val ? min : val > max ? max : val;
         },
-        lerp: function(a, b, c) {
-            return b + (c - b) * a;
+        lerp: function(ratio, start, end) {
+            return start + (end - start) * ratio;
         },
-        norm: function(a, b, c) {
-            return (a - b) / (c - b);
+        norm: function(val, min, max) {
+            return (val - min) / (max - min);
         },
-        map: function(a, b, d, e, f) {
-            return c.lerp(c.norm(a, b, d), e, f);
+        map: function(val, min1, max1, min2, max2) {
+            return _.lerp(_.norm(val, min1, max1), min2, max2);
         }
-    }, d = a.SkinnySlider = function(a, d) {
-        var f = {
+    }, C = window.SkinnySlider = function(id, options) {
+        var defaults = {
             range: [ 0, 100 ],
             start: 0,
             step: 1,
             slide: null
         };
-        this.config = c.extend(f, d), this.events = {
-            set: new e(),
-            slide: new e()
+        this.config = _.extend(defaults, options), this.events = {
+            set: new Signal(),
+            slide: new Signal()
         }, this.lock = !1, this.value = null, this.min = this.config.range[0], this.max = this.config.range[1], 
-        this.el = b.getElementById(a) || a, c.css(this.el, {
+        this.el = document.getElementById(id) || id, _.css(this.el, {
             position: "relative"
-        }), this.handle = c.append(this.el), c.addClass(this.handle, "handle"), c.css(this.handle, {
+        }), this.handle = _.append(this.el), _.addClass(this.handle, "handle"), _.css(this.handle, {
             position: "absolute"
         });
-        var g = c.bind(this.lockOnMouse, this);
-        c.on(this.el, "mousedown touchstart", g), c.on(this.handle, "mousedown touchstart", g), 
-        c.on(b, "mouseup touchend", g), c.on(b, "mousemove touchmove", c.bind(this.changeOnMove, this)), 
-        this.events.set.on(c.bind(this.render, this)), this.set(this.config.start), this.config.slide && this.events.slide.on(this.config.slide);
+        var lock = _.bind(this.lockOnMouse, this);
+        _.on(this.el, "mousedown touchstart", lock), _.on(this.handle, "mousedown touchstart", lock), 
+        _.on(document, "mouseup touchend", lock), _.on(document, "mousemove touchmove", _.bind(this.changeOnMove, this)), 
+        this.events.set.on(_.bind(this.render, this)), this.set(this.config.start), this.config.slide && this.events.slide.on(this.config.slide);
     };
-    d.prototype.stopSelect = function() {
+    C.prototype.stopSelect = function() {
         return !1;
-    }, d.prototype.lockOnMouse = function(d) {
-        d = d || a.event, this.lock = /mousedown|touchstart/.test(d.type), this.changeOnMove(d), 
-        c.off(b, "selectstart", this.stopSelect), this.lock && c.on(b, "selectstart", this.stopSelect);
-    }, d.prototype.changeOnMove = function(b) {
-        if (b = b || a.event, this.lock) {
-            b.stopPropagation && b.stopPropagation(), b.preventDefault && b.preventDefault();
-            var d = c.getPointer(b).x - c.getOffset(this.el).left, e = c.map(d, 0, this.el.clientWidth, this.min, this.max), f = this.value;
-            this.set(e), f != this.value && this.events.slide.trigger(this.value);
+    }, C.prototype.lockOnMouse = function(e) {
+        e = e || window.event, this.lock = /mousedown|touchstart/.test(e.type), this.changeOnMove(e), 
+        _.off(document, "selectstart", this.stopSelect), this.lock && _.on(document, "selectstart", this.stopSelect);
+    }, C.prototype.changeOnMove = function(e) {
+        if (e = e || window.event, this.lock) {
+            e.stopPropagation && e.stopPropagation(), e.preventDefault && e.preventDefault();
+            var x = _.getPointer(e).x - _.getOffset(this.el).left, mapped = _.map(x, 0, this.el.clientWidth, this.min, this.max), old = this.value;
+            this.set(mapped), old != this.value && this.events.slide.trigger(this.value);
         }
-    }, d.prototype.render = function(a) {
-        var b = c.map(a, this.min, this.max, 0, 100);
-        c.css(this.handle, {
-            left: b + "%"
+    }, C.prototype.render = function(val) {
+        var per = _.map(val, this.min, this.max, 0, 100);
+        _.css(this.handle, {
+            left: per + "%"
         });
-    }, d.prototype.val = function(a) {
-        return void 0 === a ? this.value : void this.set(a);
-    }, d.prototype.set = function(a) {
-        var b = c.clamp(a, this.min, this.max), d = c.round(b, this.config.step);
-        d != this.value && (this.value = d, this.events.set.trigger(this.value));
+    }, C.prototype.val = function(val) {
+        return void 0 === val ? this.value : void this.set(val);
+    }, C.prototype.set = function(mapped) {
+        var clamped = _.clamp(mapped, this.min, this.max), rounded = _.round(clamped, this.config.step);
+        rounded != this.value && (this.value = rounded, this.events.set.trigger(this.value));
     };
-    var e = function() {
-        var a = [];
-        this.on = function(b, c) {
-            return a.push({
-                fn: b,
+    var Signal = function() {
+        var callbacks = [];
+        this.on = function(fn, c) {
+            return callbacks.push({
+                fn: fn,
                 c: c
             }), this;
         }, this.trigger = function() {
-            for (var b = [].slice.call(arguments), c = 0; c < a.length; c++) a[c].fn.apply(a[c].c || this, b);
+            for (var args = [].slice.call(arguments), i = 0; i < callbacks.length; i++) callbacks[i].fn.apply(callbacks[i].c || this, args);
             return this;
-        }, this.off = function(b) {
-            if (b) for (var c = 0; c < a.length; c++) a[c] === b && (a.splice(c, 1), c--); else a = [];
+        }, this.off = function(fn) {
+            if (fn) for (var i = 0; i < callbacks.length; i++) callbacks[i] === fn && (callbacks.splice(i, 1), 
+            i--); else callbacks = [];
             return this;
         };
     };

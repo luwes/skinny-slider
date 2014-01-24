@@ -20,7 +20,8 @@ module.exports = function(grunt) {
 			},
 			beautify: {
 				options: {
-					beautify: true
+					beautify: true,
+					mangle: false
 				},
 				files: {
 					'skinny-slider.js': [
