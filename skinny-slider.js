@@ -15,6 +15,9 @@
         on: function(a, b, c) {
             if (a) for (var d = b.split(" "), e = 0; e < d.length; e++) a.attachEvent ? a.attachEvent("on" + d[e], c) : a.addEventListener(d[e], c, !1);
         },
+        off: function(a, b, c) {
+            if (a) for (var d = b.split(" "), e = 0; e < d.length; e++) a.detachEvent ? a.detachEvent("on" + d[e], c) : a.removeEventListener(d[e], c, !1);
+        },
         extend: function(a, b) {
             for (var c in b) a[c] = b[c];
             return a;
@@ -85,9 +88,12 @@
         c.on(b, "mouseup touchend", g), c.on(b, "mousemove touchmove", c.bind(this.changeOnMove, this)), 
         this.events.set.on(c.bind(this.render, this)), this.set(this.config.start), this.config.slide && this.events.slide.on(this.config.slide);
     };
-    d.prototype.lockOnMouse = function(b) {
-        b = b || a.event, b.stopPropagation && b.stopPropagation(), b.preventDefault && b.preventDefault(), 
-        this.lock = /mousedown|touchstart/.test(b.type), this.changeOnMove(b);
+    d.prototype.stopSelect = function() {
+        return !1;
+    }, d.prototype.lockOnMouse = function(d) {
+        d = d || a.event, d.stopPropagation && d.stopPropagation(), d.preventDefault && d.preventDefault(), 
+        c.off(b, "selectstart", this.stopSelect), this.lock = /mousedown|touchstart/.test(d.type), 
+        this.changeOnMove(d), this.lock && c.on(b, "selectstart", this.stopSelect);
     }, d.prototype.changeOnMove = function(b) {
         if (b = b || a.event, this.lock) {
             b.stopPropagation && b.stopPropagation(), b.preventDefault && b.preventDefault();

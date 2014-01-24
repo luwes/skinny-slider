@@ -42,13 +42,23 @@ var C = window.SkinnySlider = function(id, options) {
 	}
 };
 
+C.prototype.stopSelect = function() {
+	return false;
+};
+
 C.prototype.lockOnMouse = function(e) {
 	e = e || window.event;
 	if (e.stopPropagation) e.stopPropagation();
 	if (e.preventDefault) e.preventDefault();
 
+	_.off(document, 'selectstart', this.stopSelect);
+
 	this.lock = /mousedown|touchstart/.test(e.type);
 	this.changeOnMove(e);
+
+	if (this.lock) {
+		_.on(document, 'selectstart', this.stopSelect);
+	}
 };
 
 C.prototype.changeOnMove = function(e) {

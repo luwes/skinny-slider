@@ -28,6 +28,18 @@ var _ = {
 		}
 	},
 
+	off: function(el, type, fn) {
+		if (!el) return;
+		var arr = type.split(' ');
+		for (var i = 0; i < arr.length; i++) {
+			if (el.detachEvent) {
+				el.detachEvent('on' + arr[i], fn);
+			} else {
+				el.removeEventListener(arr[i], fn, false);
+			}
+		}
+	},
+
 	extend: function(src, dest) {
 		for (var key in dest) {
 			src[key] = dest[key];
