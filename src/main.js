@@ -48,14 +48,11 @@ C.prototype.stopSelect = function() {
 
 C.prototype.lockOnMouse = function(e) {
 	e = e || window.event;
-	if (e.stopPropagation) e.stopPropagation();
-	if (e.preventDefault) e.preventDefault();
-
-	_.off(document, 'selectstart', this.stopSelect);
 
 	this.lock = /mousedown|touchstart/.test(e.type);
 	this.changeOnMove(e);
 
+	_.off(document, 'selectstart', this.stopSelect);
 	if (this.lock) {
 		_.on(document, 'selectstart', this.stopSelect);
 	}

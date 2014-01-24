@@ -91,9 +91,8 @@
     d.prototype.stopSelect = function() {
         return !1;
     }, d.prototype.lockOnMouse = function(d) {
-        d = d || a.event, d.stopPropagation && d.stopPropagation(), d.preventDefault && d.preventDefault(), 
-        c.off(b, "selectstart", this.stopSelect), this.lock = /mousedown|touchstart/.test(d.type), 
-        this.changeOnMove(d), this.lock && c.on(b, "selectstart", this.stopSelect);
+        d = d || a.event, this.lock = /mousedown|touchstart/.test(d.type), this.changeOnMove(d), 
+        c.off(b, "selectstart", this.stopSelect), this.lock && c.on(b, "selectstart", this.stopSelect);
     }, d.prototype.changeOnMove = function(b) {
         if (b = b || a.event, this.lock) {
             b.stopPropagation && b.stopPropagation(), b.preventDefault && b.preventDefault();
