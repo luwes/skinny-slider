@@ -34,11 +34,11 @@ var C = window.SkinnySlider = function(id, options) {
 	_.on(document, 'mousemove touchmove', _.bind(this.changeOnMove, this));
 
 	this.events.slide.on(_.bind(this.render, this));
+	this.set(this.config.start);
+
 	if (this.config.slide) {
 		this.events.slide.on(this.config.slide);
 	}
-
-	this.set(this.config.start);
 };
 
 C.prototype.lockOnMouse = function(e) {

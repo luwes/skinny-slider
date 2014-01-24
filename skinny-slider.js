@@ -82,8 +82,7 @@
         var g = c.bind(this.lockOnMouse, this);
         c.on(this.el, "mousedown touchstart", g), c.on(this.handle, "mousedown touchstart", g), 
         c.on(b, "mouseup touchend", g), c.on(b, "mousemove touchmove", c.bind(this.changeOnMove, this)), 
-        this.events.slide.on(c.bind(this.render, this)), this.config.slide && this.events.slide.on(this.config.slide), 
-        this.set(this.config.start);
+        this.events.slide.on(c.bind(this.render, this)), this.set(this.config.start), this.config.slide && this.events.slide.on(this.config.slide);
     };
     d.prototype.lockOnMouse = function(b) {
         b = b || a.event, b.stopPropagation && b.stopPropagation(), b.preventDefault && b.preventDefault(), 
