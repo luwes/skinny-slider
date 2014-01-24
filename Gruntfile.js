@@ -6,14 +6,24 @@ module.exports = function(grunt) {
 		pkg: grunt.file.readJSON('package.json'),
 		// Task configuration.
 		uglify: {
-			all: {
-				options: {
-					enclose: {
-						'window,document': 'window,document'
-					}
-				},
+			options: {
+				enclose: {
+					'window,document': 'window,document'
+				}
+			},
+			minify: {
 				files: {
 					'skinny-slider.min.js': [
+						'src/*.js',
+					]
+				}
+			},
+			beautify: {
+				options: {
+					beautify: true
+				},
+				files: {
+					'skinny-slider.js': [
 						'src/*.js',
 					]
 				}
