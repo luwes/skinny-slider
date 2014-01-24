@@ -15,22 +15,24 @@ var C = window.SkinnySlider = function(id, options) {
 		slide: new Signal()
 	};
 
+	this.lock = false;
+	this.value = null;
+
 	this.min = this.config.range[0];
 	this.max = this.config.range[1];
 
-	var original = document.getElementById(id) || id;
-	this.el = original.cloneNode(); //remove old events
-	original.parentNode.replaceChild(this.el, original);
+	this.el = document.getElementById(id) || id;
 	_.css(this.el, { position: 'relative' });
 
 	this.handle = _.append(this.el);
 	_.addClass(this.handle, 'handle');
 	_.css(this.handle, { position: 'absolute' });
 
-	this.toggleLock = _.bind(this.toggleLockFn, this);
-	this.changeOnMove = _.bind(this.changeOnMoveFn, this);
-	_.on(this.el, 'mousedown touchstart', this.toggleLock);
-	_.on(this.handle, 'mousedown touchstart', this.toggleLock);
+	var lock = _.bind(this.lockOnMouse, this);
+	_.on(this.el, 'mousedown touchstart', lock);
+	_.on(this.handle, 'mousedown touchstart', lock);
+	_.on(document, 'mouseup touchend', lock);
+	_.on(document, 'mousemove touchmove', _.bind(this.changeOnMove, this));
 
 	this.events.set.on(_.bind(this.render, this));
 	this.set(this.config.start);
@@ -44,30 +46,32 @@ C.prototype.stopSelect = function() {
 	return false;
 };
 
-C.prototype.toggleLockFn = function(e) {
+C.prototype.lockOnMouse = function(e) {
 	e = e || window.event;
 
+	this.lock = /mousedown|touchstart/.test(e.type);
 	this.changeOnMove(e);
 
-	var fn = /mousedown|touchstart/.test(e.type) ? 'on' : 'off';
-	_[fn](document, 'mouseup touchend', this.toggleLock);
-	_[fn](document, 'mousemove touchmove', this.changeOnMove);
-	_[fn](document, 'selectstart', this.stopSelect);
+	_.off(document, 'selectstart', this.stopSelect);
+	if (this.lock) {
+		_.on(document, 'selectstart', this.stopSelect);
+	}
 };
 
-C.prototype.changeOnMoveFn = function(e) {
+C.prototype.changeOnMove = function(e) {
 	e = e || window.event;
+	if (this.lock) {
+		if (e.stopPropagation) e.stopPropagation();
+		if (e.preventDefault) e.preventDefault();
 
-	if (e.stopPropagation) e.stopPropagation();
-	if (e.preventDefault) e.preventDefault();
-
-	var x = _.getPointer(e).x - _.getOffset(this.el).left;
-	var mapped = _.map(x, 0, this.el.clientWidth, this.min, this.max);
-	
-	var old = this.value;
-	this.set(mapped);
-	if (old != this.value) {
-		this.events.slide.trigger(this.value);
+		var x = _.getPointer(e).x - _.getOffset(this.el).left;
+		var mapped = _.map(x, 0, this.el.clientWidth, this.min, this.max);
+		
+		var old = this.value;
+		this.set(mapped);
+		if (old != this.value) {
+			this.events.slide.trigger(this.value);
+		}
 	}
 };
 
