@@ -11,6 +11,7 @@ var C = window.SkinnySlider = function(id, options) {
 	this.config = _.extend(defaults, options);
 
 	this.events = {
+		set: new Signal(),
 		slide: new Signal()
 	};
 
@@ -33,7 +34,7 @@ var C = window.SkinnySlider = function(id, options) {
 	_.on(document, 'mouseup touchend', lock);
 	_.on(document, 'mousemove touchmove', _.bind(this.changeOnMove, this));
 
-	this.events.slide.on(_.bind(this.render, this));
+	this.events.set.on(_.bind(this.render, this));
 	this.set(this.config.start);
 
 	if (this.config.slide) {
@@ -59,7 +60,11 @@ C.prototype.changeOnMove = function(e) {
 		var x = _.getPointer(e).x - _.getOffset(this.el).left;
 		var mapped = _.map(x, 0, this.el.clientWidth, this.min, this.max);
 		
+		var old = this.value;
 		this.set(mapped);
+		if (old != this.value) {
+			this.events.slide.trigger(this.value);
+		}
 	}
 };
 
@@ -74,12 +79,7 @@ C.prototype.val = function(val) {
 };
 
 C.prototype.set = function(mapped) {
-
 	var clamped = _.clamp(mapped, this.min, this.max);
-	var rounded = _.round(clamped, this.config.step);
-
-	if (rounded != this.value) {
-		this.events.slide.trigger(rounded);
-		this.value = rounded;
-	}
+	this.value = _.round(clamped, this.config.step);
+	this.events.set.trigger(this.value);
 };

@@ -72,6 +72,7 @@
             slide: null
         };
         this.config = c.extend(f, d), this.events = {
+            set: new e(),
             slide: new e()
         }, this.lock = !1, this.value = null, this.min = this.config.range[0], this.max = this.config.range[1], 
         this.el = b.getElementById(a) || a, c.css(this.el, {
@@ -82,7 +83,7 @@
         var g = c.bind(this.lockOnMouse, this);
         c.on(this.el, "mousedown touchstart", g), c.on(this.handle, "mousedown touchstart", g), 
         c.on(b, "mouseup touchend", g), c.on(b, "mousemove touchmove", c.bind(this.changeOnMove, this)), 
-        this.events.slide.on(c.bind(this.render, this)), this.set(this.config.start), this.config.slide && this.events.slide.on(this.config.slide);
+        this.events.set.on(c.bind(this.render, this)), this.set(this.config.start), this.config.slide && this.events.slide.on(this.config.slide);
     };
     d.prototype.lockOnMouse = function(b) {
         b = b || a.event, b.stopPropagation && b.stopPropagation(), b.preventDefault && b.preventDefault(), 
@@ -90,8 +91,8 @@
     }, d.prototype.changeOnMove = function(b) {
         if (b = b || a.event, this.lock) {
             b.stopPropagation && b.stopPropagation(), b.preventDefault && b.preventDefault();
-            var d = c.getPointer(b).x - c.getOffset(this.el).left, e = c.map(d, 0, this.el.clientWidth, this.min, this.max);
-            this.set(e);
+            var d = c.getPointer(b).x - c.getOffset(this.el).left, e = c.map(d, 0, this.el.clientWidth, this.min, this.max), f = this.value;
+            this.set(e), f != this.value && this.events.slide.trigger(this.value);
         }
     }, d.prototype.render = function(a) {
         var b = c.map(a, this.min, this.max, 0, 100);
@@ -101,8 +102,8 @@
     }, d.prototype.val = function(a) {
         return void 0 === a ? this.value : void this.set(a);
     }, d.prototype.set = function(a) {
-        var b = c.clamp(a, this.min, this.max), d = c.round(b, this.config.step);
-        d != this.value && (this.events.slide.trigger(d), this.value = d);
+        var b = c.clamp(a, this.min, this.max);
+        this.value = c.round(b, this.config.step), this.events.set.trigger(this.value);
     };
     var e = function() {
         var a = [];
