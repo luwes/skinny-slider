@@ -29,6 +29,7 @@
 	<h1>Skinny Slider</h1>
 	<div id="slider"></div>
 	<script>
+
 		var slider = new SkinnySlider('slider', {
 			range: [10, 80],
 			start: 23,
@@ -37,6 +38,16 @@
 				console.log(val);
 			}
 		});
+
+		slider = new SkinnySlider('slider', {
+			range: [10, 80],
+			start: 23,
+			step: 10,
+			slide: function(val) {
+				console.log(val);
+			}
+		});
+
 	</script>
 
 </body>

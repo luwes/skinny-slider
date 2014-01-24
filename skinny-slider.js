@@ -77,28 +77,28 @@
         this.config = _.extend(defaults, options), this.events = {
             set: new Signal(),
             slide: new Signal()
-        }, this.lock = !1, this.value = null, this.min = this.config.range[0], this.max = this.config.range[1], 
-        this.el = document.getElementById(id) || id, _.css(this.el, {
+        }, this.min = this.config.range[0], this.max = this.config.range[1];
+        var original = document.getElementById(id) || id;
+        this.el = original.cloneNode(), original.parentNode.replaceChild(this.el, original), 
+        _.css(this.el, {
             position: "relative"
         }), this.handle = _.append(this.el), _.addClass(this.handle, "handle"), _.css(this.handle, {
             position: "absolute"
-        });
-        var lock = _.bind(this.lockOnMouse, this);
-        _.on(this.el, "mousedown touchstart", lock), _.on(this.handle, "mousedown touchstart", lock), 
-        _.on(document, "mouseup touchend", lock), _.on(document, "mousemove touchmove", _.bind(this.changeOnMove, this)), 
+        }), this.toggleLock = _.bind(this.toggleLockFn, this), this.changeOnMove = _.bind(this.changeOnMoveFn, this), 
+        _.on(this.el, "mousedown touchstart", this.toggleLock), _.on(this.handle, "mousedown touchstart", this.toggleLock), 
         this.events.set.on(_.bind(this.render, this)), this.set(this.config.start), this.config.slide && this.events.slide.on(this.config.slide);
     };
     C.prototype.stopSelect = function() {
         return !1;
-    }, C.prototype.lockOnMouse = function(e) {
-        e = e || window.event, this.lock = /mousedown|touchstart/.test(e.type), this.changeOnMove(e), 
-        _.off(document, "selectstart", this.stopSelect), this.lock && _.on(document, "selectstart", this.stopSelect);
-    }, C.prototype.changeOnMove = function(e) {
-        if (e = e || window.event, this.lock) {
-            e.stopPropagation && e.stopPropagation(), e.preventDefault && e.preventDefault();
-            var x = _.getPointer(e).x - _.getOffset(this.el).left, mapped = _.map(x, 0, this.el.clientWidth, this.min, this.max), old = this.value;
-            this.set(mapped), old != this.value && this.events.slide.trigger(this.value);
-        }
+    }, C.prototype.toggleLockFn = function(e) {
+        e = e || window.event, this.changeOnMove(e);
+        var fn = /mousedown|touchstart/.test(e.type) ? "on" : "off";
+        _[fn](document, "mouseup touchend", this.toggleLock), _[fn](document, "mousemove touchmove", this.changeOnMove), 
+        _[fn](document, "selectstart", this.stopSelect);
+    }, C.prototype.changeOnMoveFn = function(e) {
+        e = e || window.event, e.stopPropagation && e.stopPropagation(), e.preventDefault && e.preventDefault();
+        var x = _.getPointer(e).x - _.getOffset(this.el).left, mapped = _.map(x, 0, this.el.clientWidth, this.min, this.max), old = this.value;
+        this.set(mapped), old != this.value && this.events.slide.trigger(this.value);
     }, C.prototype.render = function(val) {
         var per = _.map(val, this.min, this.max, 0, 100);
         _.css(this.handle, {
