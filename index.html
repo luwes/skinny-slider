@@ -37,6 +37,17 @@
 				console.log(val);
 			}
 		});
+
+		document.getElementById('slider').innerHTML = '';
+
+		slider = new SkinnySlider('slider', {
+			range: [10, 80],
+			start: 23,
+			step: 10,
+			slide: function(val) {
+				console.log(val);
+			}
+		});
 	</script>
 
 </body>

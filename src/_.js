@@ -17,7 +17,6 @@ var _ = {
 	},
 
 	on: function(el, type, fn) {
-		if (!el) return;
 		var arr = type.split(' ');
 		for (var i = 0; i < arr.length; i++) {
 			if (el.attachEvent) {
@@ -29,7 +28,6 @@ var _ = {
 	},
 
 	off: function(el, type, fn) {
-		if (!el) return;
 		var arr = type.split(' ');
 		for (var i = 0; i < arr.length; i++) {
 			if (el.detachEvent) {
@@ -48,20 +46,17 @@ var _ = {
 	},
 
 	css: function(el, props) {
-		if (el) {
-			for (var key in props) {
-				if (typeof props[key] === 'undefined') {
-					continue;
-				} else if (typeof props[key] == 'number' && !(key == 'zIndex' || key == 'opacity')) {
-					if (isNaN(props[key])) {
-						continue;
-					}
-					props[key] = Math.ceil(props[key]) + 'px';
-				}
-				try {
-					el.style[key] = props[key];
-				} catch (e) {}
+		for (var key in props) {
+			var val = props[key];
+			if (typeof val === 'undefined') {
+				continue;
+			} else if (typeof val == 'number' && !(key == 'zIndex' || key == 'opacity')) {
+				if (isNaN(val)) continue;
+				val = Math.ceil(val) + 'px';
 			}
+			try {
+				el.style[key] = val;
+			} catch (e) {}
 		}
 	},
 

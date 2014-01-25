@@ -13,24 +13,27 @@
             };
         },
         on: function(el, type, fn) {
-            if (el) for (var arr = type.split(" "), i = 0; i < arr.length; i++) el.attachEvent ? el.attachEvent("on" + arr[i], fn) : el.addEventListener(arr[i], fn, !1);
+            for (var arr = type.split(" "), i = 0; i < arr.length; i++) el.attachEvent ? el.attachEvent("on" + arr[i], fn) : el.addEventListener(arr[i], fn, !1);
         },
         off: function(el, type, fn) {
-            if (el) for (var arr = type.split(" "), i = 0; i < arr.length; i++) el.detachEvent ? el.detachEvent("on" + arr[i], fn) : el.removeEventListener(arr[i], fn, !1);
+            for (var arr = type.split(" "), i = 0; i < arr.length; i++) el.detachEvent ? el.detachEvent("on" + arr[i], fn) : el.removeEventListener(arr[i], fn, !1);
         },
         extend: function(src, dest) {
             for (var key in dest) src[key] = dest[key];
             return src;
         },
         css: function(el, props) {
-            if (el) for (var key in props) if ("undefined" != typeof props[key]) {
-                if ("number" == typeof props[key] && "zIndex" != key && "opacity" != key) {
-                    if (isNaN(props[key])) continue;
-                    props[key] = Math.ceil(props[key]) + "px";
+            for (var key in props) {
+                var val = props[key];
+                if ("undefined" != typeof val) {
+                    if ("number" == typeof val && "zIndex" != key && "opacity" != key) {
+                        if (isNaN(val)) continue;
+                        val = Math.ceil(val) + "px";
+                    }
+                    try {
+                        el.style[key] = val;
+                    } catch (e) {}
                 }
-                try {
-                    el.style[key] = props[key];
-                } catch (e) {}
             }
         },
         getPointer: function(e) {
@@ -77,38 +80,38 @@
         this.config = _.extend(defaults, options), this.events = {
             set: new Signal(),
             slide: new Signal()
-        }, this.lock = !1, this.value = null, this.min = this.config.range[0], this.max = this.config.range[1], 
+        }, this.dragging = !1, this.value = null, this.min = this.config.range[0], this.max = this.config.range[1], 
         this.el = document.getElementById(id) || id, _.css(this.el, {
             position: "relative"
         }), this.handle = _.append(this.el), _.addClass(this.handle, "handle"), _.css(this.handle, {
             position: "absolute"
-        });
-        var lock = _.bind(this.lockOnMouse, this);
-        _.on(this.el, "mousedown touchstart", lock), _.on(this.handle, "mousedown touchstart", lock), 
-        _.on(document, "mouseup touchend", lock), _.on(document, "mousemove touchmove", _.bind(this.changeOnMove, this)), 
+        }), this.lock = _.bind(this.lockFn, this), this.drag = _.bind(this.dragFn, this), 
+        _.on(this.el, "mousedown touchstart", this.lock), _.on(this.handle, "mousedown touchstart", this.lock), 
         this.events.set.on(_.bind(this.render, this)), this.set(this.config.start), this.config.slide && this.events.slide.on(this.config.slide);
     };
-    C.prototype.stopSelect = function() {
-        return !1;
-    }, C.prototype.lockOnMouse = function(e) {
-        e = e || window.event, this.lock = /mousedown|touchstart/.test(e.type), this.changeOnMove(e), 
-        _.off(document, "selectstart", this.stopSelect), this.lock && _.on(document, "selectstart", this.stopSelect);
-    }, C.prototype.changeOnMove = function(e) {
-        if (e = e || window.event, this.lock) {
+    C.prototype.lockFn = function(e) {
+        e = e || window.event, this.dragging = /mousedown|touchstart/.test(e.type), this.drag(e);
+        var fn = this.dragging ? "on" : "off";
+        _[fn](document, "mouseup touchend", this.lock), _[fn](document, "mousemove touchmove", this.drag), 
+        _[fn](document, "selectstart", this.stopSelect);
+    }, C.prototype.dragFn = function(e) {
+        if (e = e || window.event, this.dragging) {
             e.stopPropagation && e.stopPropagation(), e.preventDefault && e.preventDefault();
             var x = _.getPointer(e).x - _.getOffset(this.el).left, mapped = _.map(x, 0, this.el.clientWidth, this.min, this.max), old = this.value;
             this.set(mapped), old != this.value && this.events.slide.trigger(this.value);
         }
+    }, C.prototype.stopSelect = function() {
+        return !1;
     }, C.prototype.render = function(val) {
         var per = _.map(val, this.min, this.max, 0, 100);
         _.css(this.handle, {
             left: per + "%"
         });
-    }, C.prototype.val = function(val) {
-        return void 0 === val ? this.value : void this.set(val);
     }, C.prototype.set = function(mapped) {
         var clamped = _.clamp(mapped, this.min, this.max), rounded = _.round(clamped, this.config.step);
         rounded != this.value && (this.value = rounded, this.events.set.trigger(this.value));
+    }, C.prototype.val = function(val) {
+        return void 0 === val ? this.value : void this.set(val);
     };
     var Signal = function() {
         var callbacks = [];

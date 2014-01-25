@@ -15,7 +15,7 @@ var C = window.SkinnySlider = function(id, options) {
 		slide: new Signal()
 	};
 
-	this.lock = false;
+	this.dragging = false;
 	this.value = null;
 
 	this.min = this.config.range[0];
@@ -28,11 +28,10 @@ var C = window.SkinnySlider = function(id, options) {
 	_.addClass(this.handle, 'handle');
 	_.css(this.handle, { position: 'absolute' });
 
-	var lock = _.bind(this.lockOnMouse, this);
-	_.on(this.el, 'mousedown touchstart', lock);
-	_.on(this.handle, 'mousedown touchstart', lock);
-	_.on(document, 'mouseup touchend', lock);
-	_.on(document, 'mousemove touchmove', _.bind(this.changeOnMove, this));
+	this.lock = _.bind(this.lockFn, this);
+	this.drag = _.bind(this.dragFn, this);
+	_.on(this.el, 'mousedown touchstart', this.lock);
+	_.on(this.handle, 'mousedown touchstart', this.lock);
 
 	this.events.set.on(_.bind(this.render, this));
 	this.set(this.config.start);
@@ -42,25 +41,23 @@ var C = window.SkinnySlider = function(id, options) {
 	}
 };
 
-C.prototype.stopSelect = function() {
-	return false;
-};
-
-C.prototype.lockOnMouse = function(e) {
+C.prototype.lockFn = function(e) {
 	e = e || window.event;
 
-	this.lock = /mousedown|touchstart/.test(e.type);
-	this.changeOnMove(e);
+	this.dragging = /mousedown|touchstart/.test(e.type);
+	this.drag(e);
 
-	_.off(document, 'selectstart', this.stopSelect);
-	if (this.lock) {
-		_.on(document, 'selectstart', this.stopSelect);
-	}
+	var fn = this.dragging ? 'on' : 'off';
+	_[fn](document, 'mouseup touchend', this.lock);
+	_[fn](document, 'mousemove touchmove', this.drag);
+	_[fn](document, 'selectstart', this.stopSelect);
 };
 
-C.prototype.changeOnMove = function(e) {
+C.prototype.dragFn = function(e) {
 	e = e || window.event;
-	if (this.lock) {
+	
+	if (this.dragging) {
+
 		if (e.stopPropagation) e.stopPropagation();
 		if (e.preventDefault) e.preventDefault();
 
@@ -75,14 +72,13 @@ C.prototype.changeOnMove = function(e) {
 	}
 };
 
+C.prototype.stopSelect = function() {
+	return false;
+};
+
 C.prototype.render = function(val) {
 	var per = _.map(val, this.min, this.max, 0, 100);
 	_.css(this.handle, { left: per + '%' });
-};
-
-C.prototype.val = function(val) {
-	if (val === undefined) return this.value;
-	this.set(val);
 };
 
 C.prototype.set = function(mapped) {
@@ -92,4 +88,9 @@ C.prototype.set = function(mapped) {
 		this.value = rounded;
 		this.events.set.trigger(this.value);
 	}
+};
+
+C.prototype.val = function(val) {
+	if (val === undefined) return this.value;
+	this.set(val);
 };
