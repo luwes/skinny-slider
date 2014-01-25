@@ -15,13 +15,12 @@ var C = window.SkinnySlider = function(id, options) {
 		slide: new Signal()
 	};
 
-	this.dragging = false;
-	this.value = null;
-
 	this.min = this.config.range[0];
 	this.max = this.config.range[1];
 
-	this.el = document.getElementById(id) || id;
+	var original = document.getElementById(id) || id;
+	this.el = original.cloneNode(); //remove old events
+	original.parentNode.replaceChild(this.el, original);
 	_.css(this.el, { position: 'relative' });
 
 	this.handle = _.append(this.el);
@@ -55,7 +54,7 @@ C.prototype.lockFn = function(e) {
 
 C.prototype.dragFn = function(e) {
 	e = e || window.event;
-	
+
 	if (this.dragging) {
 
 		if (e.stopPropagation) e.stopPropagation();

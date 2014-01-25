@@ -80,8 +80,10 @@
         this.config = _.extend(defaults, options), this.events = {
             set: new Signal(),
             slide: new Signal()
-        }, this.dragging = !1, this.value = null, this.min = this.config.range[0], this.max = this.config.range[1], 
-        this.el = document.getElementById(id) || id, _.css(this.el, {
+        }, this.min = this.config.range[0], this.max = this.config.range[1];
+        var original = document.getElementById(id) || id;
+        this.el = original.cloneNode(), original.parentNode.replaceChild(this.el, original), 
+        _.css(this.el, {
             position: "relative"
         }), this.handle = _.append(this.el), _.addClass(this.handle, "handle"), _.css(this.handle, {
             position: "absolute"
